@@ -10,19 +10,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          
-      - name: Install dependencies
+      - name: Verify Python & Install deps
         shell: pwsh
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install garminconnect garth notion-client
+          # Procura Python instalado
+          $pythonPath = (Get-Command python -ErrorAction SilentlyContinue).Source ?? "python"
+          Write-Output "Python: $pythonPath"
+          & $pythonPath --version
           
-      - name: Run sync
+          # Instala pacotes
+          & $pythonPath -m pip install --upgrade pip
+          & $pythonPath -m pip install -r requirements.txt garminconnect garth notion-client requests python-dateutil pytz
+      
+      - name: Sync Garmin to Notion
         shell: pwsh
         run: python -m garmin_to_notion all
         env:
@@ -31,4 +31,4 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           TIMEZONE: America/Sao_Paulo
           GARMIN_DAYS_BACK: 30
-
+          GARMIN_ACTIVITIES_FETCH_LIMIT: 1000
