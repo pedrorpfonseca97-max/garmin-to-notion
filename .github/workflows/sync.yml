@@ -11,14 +11,15 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Install deps
-        shell: pwsh
+        shell: cmd
         run: |
-          py -3 -m pip install --upgrade pip
-          py -3 -m pip install -r requirements.txt garminconnect garth notion-client requests pytz
+          python --version
+          pip install --upgrade pip
+          pip install -r requirements.txt garminconnect garth notion-client requests pytz
       
       - name: Sync Garmin
-        shell: pwsh
-        run: py -3 -m garmin_to_notion all
+        shell: cmd
+        run: python -m garmin_to_notion all
         env:
           GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
           GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
