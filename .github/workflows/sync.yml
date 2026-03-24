@@ -1,7 +1,7 @@
 name: Sync Garmin to Notion
 on:
   schedule:
-    - cron: '0 8 * * *'  # 8h diário
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:
@@ -10,25 +10,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Verify Python & Install deps
+      - name: Install Python & Deps
         shell: pwsh
         run: |
-          # Procura Python instalado
-          $pythonPath = (Get-Command python -ErrorAction SilentlyContinue).Source ?? "python"
-          Write-Output "Python: $pythonPath"
-          & $pythonPath --version
-          
-          # Instala pacotes
-          & $pythonPath -m pip install --upgrade pip
-          & $pythonPath -m pip install -r requirements.txt garminconnect garth notion-client requests python-dateutil pytz
+          # Baixa Python 3.11 portátil se não tem
+          if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+            Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip" -OutFile python.zip
+            Expand-Archive python.zip -DestinationPath ./python
+            $env:PATH += ";./python"
+          }
+          python --version
+          python -m pip install --upgrade pip
+          pip install garminconnect garth notion-client requests pytz python-dateutil -r requirements.txt
       
-      - name: Sync Garmin to Notion
+      - name: Sync Garmin
         shell: pwsh
         run: python -m garmin_to_notion all
         env:
-          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
-          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          TIMEZONE: America/Sao_Paulo
-          GARMIN_DAYS_BACK: 30
-          GARMIN_ACTIVITIES_FETCH_LIMIT: 1000
+          GARMIN_EMAIL
