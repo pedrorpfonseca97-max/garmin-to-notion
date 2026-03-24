@@ -10,21 +10,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install Python & Deps
+      - name: Install deps
         shell: pwsh
         run: |
-          # Baixa Python 3.11 portátil se não tem
-          if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
-            Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip" -OutFile python.zip
-            Expand-Archive python.zip -DestinationPath ./python
-            $env:PATH += ";./python"
-          }
-          python --version
-          python -m pip install --upgrade pip
-          pip install garminconnect garth notion-client requests pytz python-dateutil -r requirements.txt
+          py -3 -m pip install --upgrade pip
+          py -3 -m pip install -r requirements.txt garminconnect garth notion-client requests pytz
       
       - name: Sync Garmin
         shell: pwsh
-        run: python -m garmin_to_notion all
+        run: py -3 -m garmin_to_notion all
         env:
-          GARMIN_EMAIL
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          TIMEZONE: America/Sao_Paulo
+          GARMIN_DAYS_BACK: 30
