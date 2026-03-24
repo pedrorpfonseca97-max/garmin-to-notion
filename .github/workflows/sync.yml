@@ -13,9 +13,8 @@ jobs:
       - name: Install deps
         shell: cmd
         run: |
-          python --version
           pip install --upgrade pip
-          pip install -r requirements.txt garminconnect garth notion-client requests pytz
+          pip install garminconnect==0.2.19 garth notion-client requests pytz python-dateutil lxml==4.9.4
       
       - name: Sync Garmin
         shell: cmd
